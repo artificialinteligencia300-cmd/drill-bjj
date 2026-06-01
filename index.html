@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1A2C5B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Drill BJJ">
+<title>Drill BJJ School — Controle de Experimentais</title>
+<style>
+  :root {
+    --navy:#1A2C5B; --navy2:#243a73; --yellow:#F5C518; --yellow2:#ffe066;
+    --white:#fff; --bg:#f0f2f7; --card:#fff; --border:#e2e6ef;
+    --text:#1a1f2e; --text2:#4a5568; --text3:#8a94a6;
+    --red:#e53e3e; --red-bg:#fff5f5; --red-t:#c53030;
+    --amber:#d97706; --amber-bg:#fffbeb; --amber-t:#92400e;
+    --blue:#2563eb; --blue-bg:#eff6ff; --blue-t:#1e40af;
+    --green:#16a34a; --green-bg:#f0fdf4; --green-t:#15803d;
+    --shadow:0 1px 3px rgba(26,44,91,.08),0 1px 2px rgba(26,44,91,.06);
+    --shadow-md:0 4px 12px rgba(26,44,91,.12);
+    --radius:10px; --radius-sm:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100vh}
+
+  /* TOP BAR */
+  .topbar{background:var(--navy);padding:0 1.25rem;height:56px;
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:100;box-shadow:var(--shadow-md)}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-icon{width:30px;height:30px;border-radius:50%;background:var(--yellow);
+    display:flex;align-items:center;justify-content:center;font-size:16px}
+  .logo-title{color:var(--white);font-weight:700;font-size:15px;line-height:1.2}
+  .logo-sub{color:rgba(255,255,255,.5);font-size:10px}
+  .top-right{display:flex;align-items:center;gap:8px}
+  .sync-badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600;
+    display:flex;align-items:center;gap:4px;cursor:pointer}
+  .sync-ok{background:rgba(22,163,74,.25);color:#86efac}
+  .sync-err{background:rgba(229,62,62,.25);color:#fca5a5}
+  .sync-ing{background:rgba(245,197,24,.2);color:var(--yellow)}
+  .sync-cfg{background:rgba(255,255,255,.15);color:rgba(255,255,255,.7)}
+  .btn-add{background:var(--yellow);color:var(--navy);border:none;
+    padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;
+    font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px}
+  .btn-add:hover{background:var(--yellow2)}
+
+  /* SETUP BANNER */
+  .setup-banner{background:#fff8e1;border:1.5px solid #fbbf24;border-radius:var(--radius);
+    padding:1rem 1.2rem;margin-bottom:1.2rem;display:flex;align-items:flex-start;gap:12px}
+  .setup-banner.hidden{display:none}
+  .setup-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+  .setup-title{font-size:13px;font-weight:700;color:#92400e;margin-bottom:4px}
+  .setup-desc{font-size:12px;color:#78350f;line-height:1.6;margin-bottom:8px}
+  .setup-inp{font-size:12px;padding:6px 10px;width:100%;border:1.5px solid #fbbf24;
+    border-radius:var(--radius-sm);background:var(--white);color:var(--text);
+    outline:none;margin-bottom:6px}
+  .setup-inp:focus{border-color:var(--navy)}
+  .btn-cfg{font-size:12px;padding:6px 14px;border-radius:var(--radius-sm);
+    background:var(--navy);border:none;color:var(--white);cursor:pointer;font-weight:700}
+  .btn-cfg:hover{background:var(--navy2)}
+  .btn-cfg-2{font-size:11px;padding:5px 10px;border-radius:var(--radius-sm);
+    background:transparent;border:1.5px solid #fbbf24;color:#92400e;cursor:pointer}
+
+  /* MAIN */
+  .main{max-width:860px;margin:0 auto;padding:1.25rem 1rem 4rem}
+
+  /* STATS */
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1.2rem}
+  .stat{background:var(--card);border-radius:var(--radius);padding:.7rem .6rem;
+    text-align:center;box-shadow:var(--shadow);border:1px solid var(--border)}
+  .stat-val{font-size:22px;font-weight:800;color:var(--navy)}
+  .stat-lbl{font-size:10px;color:var(--text3);margin-top:2px}
+  .stat.s0 .stat-val{color:var(--red)}
+  .stat.s1 .stat-val{color:var(--amber)}
+  .stat.s2 .stat-val{color:var(--blue)}
+  .stat.s3 .stat-val{color:var(--green)}
+
+  /* TOOLBAR */
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+  .fbtn{font-size:12px;padding:5px 12px;border-radius:20px;
+    border:1.5px solid var(--border);background:var(--card);color:var(--text2);
+    cursor:pointer;font-weight:500;transition:all .15s}
+  .fbtn.on{background:var(--navy);color:var(--white);border-color:var(--navy)}
+  .srch-wrap{margin-left:auto;position:relative}
+  .srch-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text3)}
+  .srch{font-size:13px;padding:6px 10px 6px 28px;border-radius:20px;
+    border:1.5px solid var(--border);background:var(--card);color:var(--text);
+    width:170px;outline:none}
+  .srch:focus{border-color:var(--navy)}
+
+  /* STUDENT CARD */
+  .sc{background:var(--card);border:1.5px solid var(--border);
+    border-radius:var(--radius);margin-bottom:6px;cursor:pointer;
+    box-shadow:var(--shadow);transition:border-color .15s,box-shadow .15s}
+  .sc:hover{border-color:#b0bcda;box-shadow:var(--shadow-md)}
+  .sc.open{border-color:var(--navy);border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0}
+  .sc-inner{display:flex;align-items:center;gap:11px;padding:.65rem .9rem}
+  .av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+  .av0{background:var(--red-bg);color:var(--red-t)}
+  .av1{background:var(--amber-bg);color:var(--amber-t)}
+  .av2{background:var(--blue-bg);color:var(--blue-t)}
+  .av3{background:var(--green-bg);color:var(--green-t)}
+  .si{flex:1;min-width:0}
+  .sn{font-size:13px;font-weight:700;color:var(--text);
+    display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .badge{font-size:10px;font-weight:700;border-radius:4px;padding:1px 6px}
+  .b0{background:var(--red-bg);color:var(--red-t)}
+  .b1{background:var(--amber-bg);color:var(--amber-t)}
+  .b2{background:var(--blue-bg);color:var(--blue-t)}
+  .b3{background:var(--green-bg);color:var(--green-t)}
+  .bw{background:#fffbeb;color:#92400e}
+  .sd{font-size:11px;color:var(--text3);margin-top:2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dots{display:flex;gap:4px;flex-shrink:0}
+  .dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-size:9px;font-weight:700;
+    border:1.5px solid var(--border);background:var(--bg);color:var(--text3)}
+  .dot.ok{background:var(--green-bg);color:var(--green-t);border-color:#86efac}
+  .dot.sch{background:var(--blue-bg);color:var(--blue-t);border-color:#93c5fd}
+  .chv{flex-shrink:0;transition:transform .2s;color:var(--text3)}
+  .chv.up{transform:rotate(180deg)}
+
+  /* DETAIL PANEL */
+  .panel{background:#f7f9fd;border:1.5px solid var(--navy);
+    border-top:none;border-radius:0 0 var(--radius) var(--radius);
+    padding:1rem 1rem 1.1rem;margin-bottom:8px}
+  .pname{font-size:15px;font-weight:800;color:var(--navy)}
+  .pinfo{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.7}
+  .pobs{font-size:11px;background:#fffbeb;color:#92400e;border-radius:var(--radius-sm);
+    padding:5px 10px;margin-top:6px;border-left:3px solid #d97706}
+  .alert-box{border-radius:var(--radius-sm);padding:8px 12px;
+    font-size:12px;font-weight:700;margin:.8rem 0}
+  .al0{background:var(--red-bg);color:var(--red-t)}
+  .al1{background:var(--amber-bg);color:var(--amber-t)}
+  .al2{background:var(--blue-bg);color:var(--blue-t)}
+  .al3{background:var(--green-bg);color:var(--green-t)}
+  .slbl{font-size:10px;font-weight:700;color:var(--text3);
+    text-transform:uppercase;letter-spacing:.06em;margin:.9rem 0 6px}
+  .agrid{display:flex;gap:8px;flex-wrap:wrap}
+  .abox{background:var(--card);border:1.5px solid var(--border);
+    border-radius:var(--radius-sm);padding:.65rem;flex:1;min-width:130px}
+  .at{font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:600}
+  .inp{font-size:12px;padding:5px 8px;width:100%;margin-bottom:5px;
+    border:1.5px solid var(--border);border-radius:var(--radius-sm);
+    background:var(--white);color:var(--text);outline:none}
+  .inp:focus{border-color:var(--navy)}
+  .btn{font-size:12px;padding:5px 10px;border-radius:var(--radius-sm);
+    border:1.5px solid var(--border);background:var(--white);color:var(--text);
+    cursor:pointer;display:inline-flex;align-items:center;gap:4px;
+    font-weight:600;transition:all .15s}
+  .btn:hover{background:var(--bg)}
+  .btn-ok{background:var(--green-bg);border-color:#86efac;color:var(--green-t)}
+  .btn-del{border-color:#fca5a5;color:var(--red-t);font-size:10px;padding:3px 7px}
+  .btn-copy{background:var(--navy);border-color:var(--navy);color:var(--white);padding:7px 16px;font-size:13px}
+  .btn-copy:hover{background:var(--navy2)}
+  .btn-copy.copied{background:var(--green);border-color:var(--green)}
+  select{font-size:12px;padding:6px 8px;border-radius:var(--radius-sm);
+    border:1.5px solid var(--border);background:var(--white);color:var(--text);
+    width:100%;margin-bottom:8px;outline:none}
+  .msgbox{background:var(--white);border:1.5px solid var(--border);
+    border-radius:var(--radius-sm);padding:.9rem;font-size:12px;line-height:1.8;
+    white-space:pre-wrap;color:var(--text);max-height:200px;overflow-y:auto;margin-bottom:8px}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .empty{text-align:center;padding:3rem 1rem;color:var(--text3);font-size:14px}
+  .loading{text-align:center;padding:3rem 1rem;color:var(--text3)}
+  .spin{display:inline-block;width:28px;height:28px;border:3px solid var(--border);
+    border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* MODAL */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);
+    z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+  .modal{background:var(--white);border-radius:var(--radius);padding:1.5rem;
+    width:100%;max-width:460px;box-shadow:var(--shadow-md);max-height:90vh;overflow-y:auto}
+  .modal h3{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:1rem}
+  .frow{margin-bottom:.75rem}
+  .flbl{font-size:11px;font-weight:700;color:var(--text2);
+    text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block}
+  .finp{font-size:13px;padding:8px 10px;width:100%;
+    border:1.5px solid var(--border);border-radius:var(--radius-sm);
+    background:var(--white);color:var(--text);outline:none}
+  .finp:focus{border-color:var(--navy)}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:1.2rem}
+  .btn-cancel{padding:8px 16px;border-radius:var(--radius-sm);
+    border:1.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:13px;font-weight:600}
+  .btn-save{padding:8px 20px;border-radius:var(--radius-sm);
+    background:var(--navy);border:none;color:var(--white);cursor:pointer;font-size:13px;font-weight:700}
+
+  .footer{text-align:center;padding:1rem;font-size:11px;color:var(--text3)}
+
+  @media(max-width:520px){
+    .stats{grid-template-columns:repeat(3,1fr)}
+    .stat.s2,.stat.s3{display:none}
+    .srch{width:120px}
+    .agrid{flex-direction:column}
+    .fgrid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">🥋</div>
+    <div>
+      <div class="logo-title">Drill BJJ School</div>
+      <div class="logo-sub">Controle de Aulas Experimentais</div>
+    </div>
+  </div>
+  <div class="top-right">
+    <div class="sync-badge sync-cfg" id="syncBadge" onclick="showSetup()" title="Clique para configurar sincronização">
+      <span id="syncDot">☁️</span>
+      <span id="syncTxt">Configurar sync</span>
+    </div>
+    <button class="btn-add" onclick="openModal()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Novo Aluno
+    </button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SETUP BANNER -->
+  <div class="setup-banner" id="setupBanner">
+    <div class="setup-icon">☁️</div>
+    <div style="flex:1">
+      <div class="setup-title">Configure a sincronização com Google Sheets</div>
+      <div class="setup-desc">Cole abaixo a URL do seu Google Apps Script para sincronizar os dados em qualquer dispositivo. Siga o tutorial de configuração antes de usar.</div>
+      <input class="setup-inp" id="scriptUrl" placeholder="https://script.google.com/macros/s/XXXXXXX/exec" />
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-cfg" onclick="salvarUrl()">✓ Salvar e conectar</button>
+        <button class="btn-cfg-2" onclick="usarLocal()">Usar sem sincronização (somente local)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div class="toolbar">
+    <button class="fbtn on" onclick="setFilter('all',this)">Todos</button>
+    <button class="fbtn" onclick="setFilter(0,this)">Sem aula</button>
+    <button class="fbtn" onclick="setFilter(1,this)">Após 1ª</button>
+    <button class="fbtn" onclick="setFilter(2,this)">Após 2ª</button>
+    <button class="fbtn" onclick="setFilter(3,this)">Prontos</button>
+    <div class="srch-wrap">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="srch" type="text" id="srchInp" placeholder="Buscar aluno..." oninput="render()">
+    </div>
+  </div>
+  <div id="list"></div>
+  <div class="footer">Drill BJJ School · Sistema v2.0 com Google Sheets Sync</div>
+</div>
+
+<!-- MODAL NOVO ALUNO -->
+<div class="overlay" id="modalOverlay" style="display:none" onclick="if(event.target.id==='modalOverlay')closeModal()">
+  <div class="modal">
+    <h3>➕ Novo Aluno</h3>
+    <div class="frow">
+      <label class="flbl">Nome completo *</label>
+      <input class="finp" id="f-nome" placeholder="Ex: João Silva Pereira">
+    </div>
+    <div class="fgrid">
+      <div class="frow">
+        <label class="flbl">Idade</label>
+        <input class="finp" id="f-idade" type="number" placeholder="13">
+      </div>
+      <div class="frow">
+        <label class="flbl">WhatsApp aluno</label>
+        <input class="finp" id="f-wp" placeholder="(51) 99999-0000">
+      </div>
+    </div>
+    <div class="frow">
+      <label class="flbl">Responsável legal</label>
+      <input class="finp" id="f-resp" placeholder="Nome do responsável">
+    </div>
+    <div class="frow">
+      <label class="flbl">WhatsApp responsável</label>
+      <input class="finp" id="f-wpR" placeholder="(51) 99999-0000">
+    </div>
+    <div class="frow">
+      <label class="flbl">Indicação / Notas</label>
+      <input class="finp" id="f-notas" placeholder="Ex: Indicação: Lucas Monteiro">
+    </div>
+    <div class="mbtns">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveAluno()">Salvar Aluno</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS_KEY   = 'drill_bjj_v2';
+const LS_URL   = 'drill_bjj_url';
+const LS_MODE  = 'drill_bjj_mode';
+
+const INIT_DATA = [
+  {id:1,nome:"Pedro Ehlers Kraís Borges",idade:15,wp:"(51) 99302-6019",wpR:"(51) 98125-6134",resp:"Responsável não especificado",notas:"Convidado por Artur",warn:false,aulas:[{f:true,d:"07/05/26",h:"16:00"},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:2,nome:"Chai Sadigursky",idade:24,wp:"(51) 99237-9217",wpR:"",resp:"O próprio",notas:"E-mail: chaisadigursky@gmail.com · Adulto",warn:false,aulas:[{f:false,d:"",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:3,nome:"Vicente Picoli Guimarães",idade:13,wp:"(51) 99101-1704",wpR:"(51) 99999-8142",resp:"Cláudio / Camila",notas:"Indicação: Lucas Monteiro",warn:false,aulas:[{f:true,d:"12/05/26",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:4,nome:"Rico Nasser Northfleet Heemann",idade:13,wp:"(51) 99136-1422",wpR:"(51) 99800-3008",resp:"Patrícia Prado Nasser",notas:"Indicação: Lucas Monteiro",warn:false,aulas:[{f:true,d:"12/05/26",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:5,nome:"Inácio Peres",idade:13,wp:"(51) 99401-5218",wpR:"(51) 99113-1609",resp:"Daniela / Cesar Augusto",notas:"Indicação: Eduardo Farias",warn:false,aulas:[{f:true,d:"12/05/26",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:6,nome:"Vivenzo (?)",idade:13,wp:"(51) 98519-8927",wpR:"(51) 98167-0113",resp:"Gonçalo Pombo",notas:"Sobrenome pendente · Indicação: Cisco Flamejante",warn:true,aulas:[{f:true,d:"12/05/26",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:7,nome:"Gonçalo Coelho (Selmo)",idade:12,wp:"(51) 99375-2491",wpR:"(51) 99272-2190",resp:"Selmo",notas:"Indicação: Eduardo Farias",warn:false,aulas:[{f:true,d:"12/05/26",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:8,nome:"Pedro Loss",idade:13,wp:"(51) 99965-7274",wpR:"",resp:"Camila",notas:"Indicação: Eduardo Farias",warn:false,aulas:[{f:true,d:"12/05/26",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:9,nome:"Gabriel (?)",idade:13,wp:"",wpR:"",resp:"Ivair",notas:"Sobrenome e WhatsApp pendentes · Indicação: Eduardo Farias",warn:true,aulas:[{f:true,d:"12/05/26",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:10,nome:"Gonçalo Coelho (Cristian)",idade:13,wp:"(51) 99887-8171",wpR:"(51) 99882-6767",resp:"Cristian",notas:"Indicação: Eduardo Farias · Atenção: homônimo ID 7",warn:false,aulas:[{f:true,d:"12/05/26",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:11,nome:"Lorenzo Fatturi Goldoni",idade:13,wp:"(51) 99957-5461",wpR:"",resp:"Viviane Fatturi Goldoni",notas:"Prof. Fábio Devisate / Daniel Heermann",warn:false,aulas:[{f:true,d:"25/05/26",h:"16:00"},{f:true,d:"26/05/26",h:"16:00"},{f:false,d:"",h:""}]},
+  {id:12,nome:"Davi Mazzani Pacheco",idade:null,wp:"(51) 98119-0007",wpR:"",resp:"Fábio Pacheco",notas:"Idade não informada · Prof. Fábio Devisate",warn:true,aulas:[{f:true,d:"25/05/26",h:"17:00"},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:13,nome:"Thiago Prado",idade:13,wp:"(51) 98062-1120",wpR:"(51) 99999-6005",resp:"Caroline Girotto",notas:"Prof. Daniel Heermann",warn:false,aulas:[{f:true,d:"25/05/26",h:"16:15"},{f:true,d:"26/05/26",h:"16:15"},{f:false,d:"",h:""}]},
+  {id:14,nome:"Enzo da Rocha Schwez",idade:13,wp:"(51) 98273-3144",wpR:"(51) 99368-0001",resp:"Rodrigo de Souza Schwez",notas:"Prof. Daniel Heermann",warn:false,aulas:[{f:true,d:"26/05/26",h:"16:00"},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:15,nome:"Santiago Sgaravatti",idade:13,wp:"(51) 99516-0032",wpR:"(51) 98179-3139",resp:"Catia Maciel",notas:"Prof. Daniel Heermann",warn:false,aulas:[{f:true,d:"26/05/26",h:"16:00"},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:16,nome:"Lucas Emir Vianna Abreu",idade:12,wp:"(51) 98137-4323",wpR:"",resp:"Marcelo Emir Requia Abreu",notas:"Prof. Parodeda",warn:false,aulas:[{f:true,d:"27/05/26",h:"16:15"},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:17,nome:"Benicio de Oliveira Outerial",idade:14,wp:"(51) 99112-1211",wpR:"(51) 981599779",resp:"Felipe Hebert Outerial",notas:"Aula agendada 03/06 às 18:15",warn:false,aulas:[{f:false,d:"03/06/26",h:"18:15"},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:18,nome:"Victor Lopes",idade:14,wp:"(51) 9730-1875",wpR:"",resp:"Michele Antunes de Oliveira",notas:"Sem data · Indicação: Vicente Lutz",warn:true,aulas:[{f:false,d:"",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:19,nome:"Lorenzo Lameira Bisatto",idade:13,wp:"(51) 99595-5580",wpR:"",resp:"Cristiane / Carlos Antônio",notas:"Cadastro recente · Sem data",warn:false,aulas:[{f:false,d:"",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]},
+  {id:20,nome:"Arthur Neumann Giacometo",idade:14,wp:"(51) 98578-3535",wpR:"(51) 98125-5251",resp:"Caroline Winck / Guilherme",notas:"3 aulas realizadas — datas pendentes na ficha",warn:true,aulas:[{f:true,d:"",h:""},{f:true,d:"",h:""},{f:true,d:"",h:""}]},
+  {id:21,nome:"Arthur Torres",idade:14,wp:"(51) 99371-0206",wpR:"(51) 99341-6087",resp:"Rose Andreia / Vitor Torres",notas:"1ª aula realizada — data pendente",warn:true,aulas:[{f:true,d:"",h:""},{f:false,d:"",h:""},{f:false,d:"",h:""}]}
+];
+
+const ALERTS=[
+  {cls:"al0",txt:"📞 Contatar — agendar a 1ª aula experimental"},
+  {cls:"al1",txt:"📲 Enviar mensagem — agendar a 2ª aula"},
+  {cls:"al2",txt:"⚡ ÚLTIMA AULA GRATUITA — agendar a 3ª com urgência e apresentar os planos!"},
+  {cls:"al3",txt:"🏆 PRONTO PARA MATRÍCULA — ligar agora e fechar o plano!"}
+];
+const SLBLs=["🔴 Sem aula","🟡 Após 1ª aula","🔵 Após 2ª aula","✅ Pronto p/ matrícula"];
+const BCLS=["b0","b1","b2","b3"];
+const AVCLS=["av0","av1","av2","av3"];
+
+let students=[], selId=null, filter='all', msgTypes={}, copiedId=null;
+let scriptUrl='', syncMode='none';
+
+// ── SYNC FUNCS ──
+function setSyncUI(state){
+  const b=document.getElementById('syncBadge');
+  const t=document.getElementById('syncTxt');
+  const d=document.getElementById('syncDot');
+  const states={
+    ok:{cls:'sync-ok',dot:'✓',txt:'Sincronizado'},
+    syncing:{cls:'sync-ing',dot:'↻',txt:'Salvando...'},
+    error:{cls:'sync-err',dot:'✗',txt:'Erro sync'},
+    local:{cls:'sync-cfg',dot:'💾',txt:'Somente local'},
+    cfg:{cls:'sync-cfg',dot:'☁️',txt:'Configurar sync'}
+  };
+  const s=states[state]||states.cfg;
+  b.className='sync-badge '+s.cls;
+  d.textContent=s.dot;
+  t.textContent=s.txt;
+}
+
+async function loadFromSheets(){
+  if(!scriptUrl) return loadLocal();
+  try{
+    setSyncUI('syncing');
+    const r=await fetch(scriptUrl+'?t='+Date.now());
+    const data=await r.json();
+    if(Array.isArray(data)&&data.length>0){
+      students=data;
+      localStorage.setItem(LS_KEY,JSON.stringify(students));
+    } else if(Array.isArray(data)&&data.length===0){
+      // Planilha vazia — envia dados iniciais
+      students=JSON.parse(JSON.stringify(INIT_DATA));
+      await saveToSheets();
+    } else {
+      loadLocal();
+    }
+    setSyncUI('ok');
+  }catch(e){
+    console.warn('Sheets load failed',e);
+    loadLocal();
+    setSyncUI('error');
+  }
+  render();
+}
+
+async function saveToSheets(){
+  if(!scriptUrl){ saveLocal(); return; }
+  setSyncUI('syncing');
+  saveLocal();
+  try{
+    await fetch(scriptUrl,{
+      method:'POST',
+      body:JSON.stringify(students),
+      headers:{'Content-Type':'text/plain'}
+    });
+    setSyncUI('ok');
+  }catch(e){
+    console.warn('Sheets save failed',e);
+    setSyncUI('error');
+  }
+}
+
+function loadLocal(){
+  try{
+    const d=localStorage.getItem(LS_KEY);
+    students=d?JSON.parse(d):JSON.parse(JSON.stringify(INIT_DATA));
+  }catch(e){students=JSON.parse(JSON.stringify(INIT_DATA));}
+}
+function saveLocal(){ localStorage.setItem(LS_KEY,JSON.stringify(students)); }
+
+function salvarUrl(){
+  const url=document.getElementById('scriptUrl').value.trim();
+  if(!url.startsWith('https://script.google.com')){
+    alert('URL inválida. Deve começar com https://script.google.com ...');
+    return;
+  }
+  scriptUrl=url;
+  syncMode='sheets';
+  localStorage.setItem(LS_URL,url);
+  localStorage.setItem(LS_MODE,'sheets');
+  document.getElementById('setupBanner').classList.add('hidden');
+  loadFromSheets();
+}
+
+function usarLocal(){
+  syncMode='local';
+  localStorage.setItem(LS_MODE,'local');
+  document.getElementById('setupBanner').classList.add('hidden');
+  setSyncUI('local');
+  loadLocal();
+  render();
+}
+
+function showSetup(){
+  document.getElementById('setupBanner').classList.remove('hidden');
+}
+
+function init(){
+  scriptUrl=localStorage.getItem(LS_URL)||'';
+  syncMode=localStorage.getItem(LS_MODE)||'none';
+  if(syncMode==='sheets'&&scriptUrl){
+    document.getElementById('setupBanner').classList.add('hidden');
+    document.getElementById('scriptUrl').value=scriptUrl;
+    loadFromSheets();
+  } else if(syncMode==='local'){
+    document.getElementById('setupBanner').classList.add('hidden');
+    setSyncUI('local');
+    loadLocal();
+    render();
+  } else {
+    setSyncUI('cfg');
+    loadLocal();
+    render();
+  }
+}
+
+// ── HELPERS ──
+const stg=s=>s.aulas.filter(a=>a.f).length;
+const ini=n=>n.split(' ').filter(Boolean).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
+const nextId=()=>students.length?Math.max(...students.map(s=>s.id))+1:1;
+
+function buildMsg(s,type){
+  const rp=s.resp.split(' ')[0];
+  const nm=s.nome.split(' ')[0];
+  const left=3-stg(s);
+  return {
+    agendar:`Olá ${rp}! 😊\n\nAqui é da Drill BJJ School! Passando para confirmar a aula experimental do(a) *${nm}*. 🥋\n\nOfertamos *3 aulas experimentais gratuitas* para ele(a) conhecer a turma e a metodologia sem compromisso!\n\nFornecemos o kimono — só precisa vir com bermuda tactel, camiseta e chinelinho. ✅\n\nQual o melhor horário para vocês? 😊`,
+    pos1:`Olá ${rp}! 😊\n\nPassando para saber como foi a *1ª aula experimental* do(a) *${nm}* aqui na Drill BJJ! 🥋\n\nO que acharam? Curtiu?\n\nAinda tem *2 aulas gratuitas* esperando! 🔥 Quando agendamos a próxima? 💪`,
+    pos2:`Olá ${rp}! 😊\n\nQue evolução! O(a) *${nm}* já tem 2 aulas e está mandando muito bem! 🥋🔥\n\nÉ a *última aula experimental gratuita* — já posso te apresentar as condições especiais dos planos! 💪😊`,
+    pos3:`Parabéns ${rp}! 🎉🥋\n\nO(a) *${nm}* completou as *3 aulas experimentais* com sucesso!\n\nAgora é hora de garantir a matrícula! 🔥\n\n✅ Mensal — maior flexibilidade\n✅ Trimestral — 10% de economia\n✅ Semestral — melhor custo-benefício\n✅ Anual — máxima economia + férias bônus\n\nPosso te ajudar a escolher o melhor plano? 😊💪`,
+    lembrete:`Olá ${rp}! 😊\n\nSó passando para lembrar que amanhã é o dia da aula do(a) *${nm}* na Drill BJJ! 🥋🔥\n\n📍 Não esqueça:\n• Bermuda tactel + camiseta\n• Chinelinho fora do tatame\n• Kimono é com a gente! 😊\n\nTe esperamos! 💪`,
+    followup:`Olá ${rp}! 😊\n\nPassando com saudade do(a) *${nm}*! 🥋\n\nAinda tem *${left} aula(s) gratuita(s)* disponível(is)!\n\nAs portas da Drill BJJ estão sempre abertas. É só chamar! 💪😊`
+  }[type]||'';
+}
+
+function setFilter(f,btn){
+  filter=f; selId=null;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); render();
+}
+
+function getFiltered(){
+  const q=document.getElementById('srchInp')?.value.toLowerCase()||'';
+  return students.filter(s=>{
+    const sm=filter==='all'||stg(s)===filter;
+    const qm=!q||s.nome.toLowerCase().includes(q)||s.resp.toLowerCase().includes(q);
+    return sm&&qm;
+  });
+}
+
+function markAula(sid,ai,f,d,h){
+  students=students.map(s=>s.id!==sid?s:{...s,aulas:s.aulas.map((a,i)=>i===ai?{...a,f,d,h}:a)});
+  saveToSheets(); render();
+}
+function doMark(sid,ai,dk,hk){
+  const d=document.getElementById(dk)?.value||'';
+  const h=document.getElementById(hk)?.value||'';
+  markAula(sid,ai,true,d,h);
+}
+
+function copyMsg(sid,type){
+  const s=students.find(x=>x.id===sid); if(!s)return;
+  const msg=buildMsg(s,type);
+  const done=()=>{copiedId=sid;render();setTimeout(()=>{copiedId=null;render();},2500);};
+  navigator.clipboard.writeText(msg).then(done).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=msg;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);done();
+  });
+}
+
+function openModal(){document.getElementById('modalOverlay').style.display='flex';}
+function closeModal(){
+  document.getElementById('modalOverlay').style.display='none';
+  ['f-nome','f-idade','f-wp','f-wpR','f-resp','f-notas'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+function saveAluno(){
+  const nome=document.getElementById('f-nome').value.trim();
+  if(!nome){alert('Por favor, informe o nome do aluno.');return;}
+  const novo={
+    id:nextId(),nome,
+    idade:parseInt(document.getElementById('f-idade').value)||null,
+    wp:document.getElementById('f-wp').value.trim(),
+    wpR:document.getElementById('f-wpR').value.trim(),
+    resp:document.getElementById('f-resp').value.trim()||'Não informado',
+    notas:document.getElementById('f-notas').value.trim(),
+    warn:false,
+    aulas:[{f:false,d:'',h:''},{f:false,d:'',h:''},{f:false,d:'',h:''}]
+  };
+  students.push(novo);
+  saveToSheets();
+  closeModal(); selId=novo.id; render();
+}
+
+function render(){
+  const counts=[0,1,2,3].map(n=>students.filter(s=>stg(s)===n).length);
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="stat-val">${students.length}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat s0"><div class="stat-val">${counts[0]}</div><div class="stat-lbl">Sem aula</div></div>
+    <div class="stat s1"><div class="stat-val">${counts[1]}</div><div class="stat-lbl">Aguard. 2ª</div></div>
+    <div class="stat s2"><div class="stat-val">${counts[2]}</div><div class="stat-lbl">Aguard. 3ª</div></div>
+    <div class="stat s3"><div class="stat-val">${counts[3]}</div><div class="stat-lbl">Matrícula</div></div>`;
+
+  const fs=getFiltered();
+  if(!fs.length){document.getElementById('list').innerHTML='<div class="empty">Nenhum aluno encontrado.</div>';return;}
+
+  let html='';
+  fs.forEach(s=>{
+    const st=stg(s); const isOpen=selId===s.id;
+    if(!msgTypes[s.id]) msgTypes[s.id]=st===0?'agendar':st===1?'pos1':st===2?'pos2':'pos3';
+    const dots=s.aulas.map((a,i)=>`<div class="dot${a.f?' ok':a.d?' sch':''}">${a.f?'✓':i+1}</div>`).join('');
+    html+=`<div class="sc${isOpen?' open':''}" onclick="toggleSel(${s.id})">
+      <div class="sc-inner">
+        <div class="av ${AVCLS[st]}">${ini(s.nome)}</div>
+        <div class="si">
+          <div class="sn">${s.nome}<span class="badge ${BCLS[st]}">${SLBLs[st]}</span>${s.warn?'<span class="badge bw">⚠</span>':''}</div>
+          <div class="sd">${s.resp}${s.wp?' · '+s.wp:''}</div>
+        </div>
+        <div class="dots">${dots}</div>
+        <svg class="chv${isOpen?' up':''}" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+    </div>`;
+
+    if(isOpen){
+      const al=ALERTS[st]; const mt=msgTypes[s.id];
+      const ah=s.aulas.map((a,i)=>{
+        const dk=`d-${s.id}-${i}`,hk=`h-${s.id}-${i}`;
+        if(a.f)return`<div class="abox"><div class="at">${i+1}ª Aula</div>
+          <div style="font-size:12px;font-weight:700;color:var(--green)">✓ Realizada</div>
+          <div style="font-size:11px;color:var(--text3);margin:3px 0 6px">${a.d||'data pendente'} ${a.h}</div>
+          <button class="btn btn-del" onclick="event.stopPropagation();markAula(${s.id},${i},false,'','')">✕ Desfazer</button></div>`;
+        if(a.d)return`<div class="abox"><div class="at">${i+1}ª Aula</div>
+          <div style="font-size:12px;font-weight:700;color:var(--blue)">📅 Agendada</div>
+          <div style="font-size:11px;color:var(--text3);margin:3px 0 6px">${a.d} ${a.h}</div>
+          <button class="btn btn-ok" onclick="event.stopPropagation();markAula(${s.id},${i},true,'${a.d}','${a.h}')">✓ Confirmar</button></div>`;
+        return`<div class="abox"><div class="at">${i+1}ª Aula</div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:7px">Pendente</div>
+          <input class="inp" id="${dk}" type="text" placeholder="Data DD/MM" onclick="event.stopPropagation()">
+          <input class="inp" id="${hk}" type="text" placeholder="Horário" onclick="event.stopPropagation()">
+          <button class="btn btn-ok" onclick="event.stopPropagation();doMark(${s.id},${i},'${dk}','${hk}')">✓ Marcar feita</button></div>`;
+      }).join('');
+
+      const opts=[
+        ['agendar','Agendar 1ª aula'],['pos1','Após 1ª → convidar p/ 2ª'],
+        ['pos2','Após 2ª → convidar p/ 3ª (última!)'],['pos3','Após 3ª → Fechar matrícula'],
+        ['lembrete','Lembrete véspera da aula'],['followup','Follow-up — aluno sumiu']
+      ].map(([v,l])=>`<option value="${v}"${mt===v?' selected':''}>${l}</option>`).join('');
+
+      const isCop=copiedId===s.id;
+      html+=`<div class="panel" onclick="event.stopPropagation()">
+        <div class="pname">${s.nome}${s.idade?' · '+s.idade+' anos':''}</div>
+        <div class="pinfo">Responsável: <strong>${s.resp}</strong><br>${s.wp?'WhatsApp: '+s.wp:''}${s.wpR?' · Resp: '+s.wpR:''}</div>
+        ${s.notas?`<div class="pobs">${s.warn?'⚠ ':''}${s.notas}</div>`:''}
+        <div class="alert-box ${al.cls}">${al.txt}</div>
+        <div class="slbl">Controle de aulas</div>
+        <div class="agrid">${ah}</div>
+        <div class="slbl">Mensagem WhatsApp</div>
+        <select onchange="msgTypes[${s.id}]=this.value;render()">${opts}</select>
+        <div class="msgbox">${buildMsg(s,mt)}</div>
+        <div class="btn-row">
+          <button class="btn btn-copy${isCop?' copied':''}" onclick="copyMsg(${s.id},'${mt}')">${isCop?'✓ Copiado!':'📋 Copiar mensagem'}</button>
+          ${s.wp?`<a href="https://wa.me/55${s.wp.replace(/\D/g,'')}" target="_blank" rel="noopener" style="text-decoration:none"><button class="btn" onclick="event.stopPropagation()">💬 Abrir WhatsApp</button></a>`:''}
+        </div>
+      </div>`;
+    }
+  });
+  document.getElementById('list').innerHTML=html;
+}
+
+function toggleSel(id){selId=selId===id?null:id;render();}
+init();
+</script>
+</body>
+</html>
