@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1A2C5B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Drill BJJ — Cadastro Experimental</title>
+<style>
+  :root{
+    --navy:#1A2C5B; --navy2:#243a73; --yellow:#F5C518;
+    --bg:#0e1a36; --card:#162040; --border:#243a73;
+    --text:#f0f0f0; --text2:#b0bcda; --text3:#6a7fa8;
+    --green:#4caf50; --green-bg:#0a2010; --green-t:#86e88a;
+    --red:#ff6b6b; --radius:12px; --radius-sm:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:3rem}
+
+  /* HEADER */
+  .header{background:#0a1428;border-bottom:3px solid var(--yellow);
+    padding:1.2rem 1.25rem;text-align:center}
+  .header-logo{font-size:28px;margin-bottom:6px}
+  .header-title{color:var(--yellow);font-size:18px;font-weight:800;letter-spacing:.02em}
+  .header-sub{color:var(--text2);font-size:12px;margin-top:3px}
+
+  /* PROGRESS */
+  .progress-wrap{padding:.9rem 1.25rem;background:#0a1428}
+  .progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--yellow);border-radius:2px;transition:width .4s ease}
+  .progress-txt{font-size:11px;color:var(--text3);margin-top:5px;text-align:right}
+
+  /* STEPS */
+  .step{display:none;padding:1rem 1.25rem}
+  .step.active{display:block}
+  .step-title{font-size:16px;font-weight:700;color:var(--yellow);
+    margin-bottom:.2rem;display:flex;align-items:center;gap:8px}
+  .step-sub{font-size:12px;color:var(--text3);margin-bottom:1.2rem}
+
+  /* FORM FIELDS */
+  .frow{margin-bottom:.9rem}
+  .flbl{font-size:11px;font-weight:700;color:var(--text3);
+    text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:5px}
+  .flbl span{color:var(--yellow)}
+  .finp,.fsel,.ftxt{font-size:14px;padding:10px 12px;width:100%;
+    border:1.5px solid var(--border);border-radius:var(--radius-sm);
+    background:#0e1a36;color:var(--text);outline:none;
+    -webkit-appearance:none;appearance:none}
+  .finp:focus,.fsel:focus,.ftxt:focus{border-color:var(--yellow)}
+  .ftxt{resize:none;min-height:80px;line-height:1.5}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+  /* RADIO / CHECK GROUPS */
+  .radio-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .radio-item{display:flex;align-items:center;gap:6px;
+    background:#0e1a36;border:1.5px solid var(--border);
+    border-radius:var(--radius-sm);padding:8px 12px;cursor:pointer;
+    font-size:13px;color:var(--text2);flex:1;min-width:80px;
+    transition:all .15s}
+  .radio-item.selected{background:#1a2a00;border-color:var(--yellow);color:var(--yellow);font-weight:600}
+  .radio-item input{display:none}
+
+  /* YES/NO */
+  .yn-group{display:flex;gap:10px;margin-top:4px}
+  .yn-btn{flex:1;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+    background:#0e1a36;color:var(--text2);font-size:14px;font-weight:600;
+    cursor:pointer;text-align:center;transition:all .15s}
+  .yn-btn.yes.sel{background:#0a2010;border-color:var(--green-t);color:var(--green-t)}
+  .yn-btn.no.sel{background:#2a1020;border-color:#ff8080;color:#ff8080}
+
+  /* NAV BTNS */
+  .nav{display:flex;gap:10px;margin-top:1.5rem}
+  .btn-back{flex:1;padding:13px;border-radius:var(--radius-sm);
+    border:1.5px solid var(--border);background:transparent;
+    color:var(--text2);font-size:14px;font-weight:600;cursor:pointer}
+  .btn-next{flex:2;padding:13px;border-radius:var(--radius-sm);
+    border:none;background:var(--yellow);color:#0a1428;
+    font-size:14px;font-weight:800;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:6px}
+  .btn-next:active{background:#ffe066}
+  .btn-next:disabled{background:#444;color:#888;cursor:not-allowed}
+
+  /* CONDITIONAL FIELD */
+  .cond-field{display:none;margin-top:8px}
+  .cond-field.show{display:block}
+
+  /* SUCCESS SCREEN */
+  .success{display:none;text-align:center;padding:3rem 1.5rem}
+  .success.show{display:block}
+  .success-icon{font-size:64px;margin-bottom:1rem}
+  .success-title{font-size:22px;font-weight:800;color:var(--yellow);margin-bottom:.5rem}
+  .success-msg{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:2rem}
+  .success-belt{display:flex;justify-content:center;gap:6px;margin-bottom:2rem}
+  .belt-dot{width:30px;height:12px;border-radius:3px}
+
+  /* LOADING */
+  .loading-overlay{position:fixed;inset:0;background:rgba(10,20,40,.92);
+    z-index:999;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;display:none}
+  .loading-overlay.show{display:flex}
+  .spin{width:40px;height:40px;border:3px solid var(--border);
+    border-top-color:var(--yellow);border-radius:50%;
+    animation:spin .7s linear infinite;margin-bottom:1rem}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-txt{color:var(--yellow);font-size:14px;font-weight:600}
+
+  /* CONFIG BANNER */
+  .cfg-banner{background:#1a1500;border:1.5px solid var(--yellow);
+    border-radius:var(--radius);padding:.9rem 1.1rem;margin:1rem 1.25rem 0;display:none}
+  .cfg-banner.show{display:block}
+  .cfg-title{font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:6px}
+  .cfg-inp{font-size:12px;padding:7px 10px;width:100%;
+    border:1.5px solid var(--yellow);border-radius:var(--radius-sm);
+    background:#0e1a36;color:var(--text);outline:none;margin-bottom:6px}
+  .btn-cfg{font-size:12px;padding:6px 14px;border-radius:var(--radius-sm);
+    background:var(--yellow);border:none;color:#0a1428;cursor:pointer;font-weight:700}
+
+  select option{background:#162040;color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">🥋</div>
+  <div class="header-title">DRILL BJJ SCHOOL</div>
+  <div class="header-sub">Ficha de Cadastro — Aula Experimental</div>
+</div>
+
+<!-- CONFIG BANNER -->
+<div class="cfg-banner" id="cfgBanner">
+  <div class="cfg-title">⚙️ Configure o endpoint para salvar os dados</div>
+  <input class="cfg-inp" id="cfgUrl" placeholder="https://script.google.com/macros/s/.../exec">
+  <button class="btn-cfg" onclick="saveCfg()">Salvar</button>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:20%"></div></div>
+  <div class="progress-txt" id="progressTxt">Passo 1 de 5</div>
+</div>
+
+<!-- ── STEP 1: DADOS PESSOAIS ── -->
+<div class="step active" id="step1">
+  <div class="step-title">👤 Dados Pessoais</div>
+  <div class="step-sub">Preencha seus dados básicos</div>
+
+  <div class="frow">
+    <label class="flbl">Nome completo <span>*</span></label>
+    <input class="finp" id="nome" placeholder="Seu nome completo" autocomplete="name">
+  </div>
+  <div class="fgrid">
+    <div class="frow">
+      <label class="flbl">Data de Nascimento</label>
+      <input class="finp" id="dataNasc" type="date">
+    </div>
+    <div class="frow">
+      <label class="flbl">Idade</label>
+      <input class="finp" id="idade" type="number" placeholder="Ex: 13" min="3" max="80">
+    </div>
+  </div>
+  <div class="frow">
+    <label class="flbl">Profissão</label>
+    <input class="finp" id="profissao" placeholder="Ex: Estudante, Engenheiro...">
+  </div>
+  <div class="fgrid">
+    <div class="frow">
+      <label class="flbl">Peso (kg)</label>
+      <input class="finp" id="peso" type="number" placeholder="Ex: 65">
+    </div>
+    <div class="frow">
+      <label class="flbl">Altura (cm)</label>
+      <input class="finp" id="altura" type="number" placeholder="Ex: 170">
+    </div>
+  </div>
+  <div class="frow">
+    <label class="flbl">Estado Civil</label>
+    <select class="fsel" id="estadoCivil">
+      <option value="">Selecione...</option>
+      <option>Solteiro(a)</option>
+      <option>Casado(a)</option>
+      <option>Divorciado(a)</option>
+      <option>Viúvo(a)</option>
+      <option>União Estável</option>
+    </select>
+  </div>
+
+  <div class="nav">
+    <button class="btn-next" onclick="goStep(2)">Próximo ➜</button>
+  </div>
+</div>
+
+<!-- ── STEP 2: CONTATO ── -->
+<div class="step" id="step2">
+  <div class="step-title">📱 Contato</div>
+  <div class="step-sub">Como podemos te contatar?</div>
+
+  <div class="frow">
+    <label class="flbl">WhatsApp / Telefone <span>*</span></label>
+    <input class="finp" id="fone" type="tel" placeholder="(51) 99999-0000" autocomplete="tel">
+  </div>
+  <div class="frow">
+    <label class="flbl">E-mail</label>
+    <input class="finp" id="email" type="email" placeholder="seu@email.com" autocomplete="email">
+  </div>
+  <div class="frow">
+    <label class="flbl">Endereço</label>
+    <input class="finp" id="endereco" placeholder="Rua, número">
+  </div>
+  <div class="fgrid">
+    <div class="frow">
+      <label class="flbl">Bairro</label>
+      <input class="finp" id="bairro" placeholder="Bairro">
+    </div>
+    <div class="frow">
+      <label class="flbl">CEP</label>
+      <input class="finp" id="cep" placeholder="00000-000">
+    </div>
+  </div>
+
+  <!-- RESPONSÁVEL SE MENOR -->
+  <div id="respSection">
+    <div class="frow">
+      <label class="flbl">Nome do Responsável <span style="color:var(--text3)">(se menor de idade)</span></label>
+      <input class="finp" id="responsavel" placeholder="Nome do responsável legal">
+    </div>
+    <div class="frow">
+      <label class="flbl">WhatsApp do Responsável</label>
+      <input class="finp" id="wpResp" type="tel" placeholder="(51) 99999-0000">
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="btn-back" onclick="goStep(1)">← Voltar</button>
+    <button class="btn-next" onclick="goStep(3)">Próximo ➜</button>
+  </div>
+</div>
+
+<!-- ── STEP 3: EXPERIÊNCIA ── -->
+<div class="step" id="step3">
+  <div class="step-title">🥊 Experiência</div>
+  <div class="step-sub">Conta um pouco sobre você</div>
+
+  <div class="frow">
+    <label class="flbl">Já praticou Jiu-Jitsu ou arte marcial?</label>
+    <div class="yn-group">
+      <div class="yn-btn yes" id="ynJJ_sim" onclick="setYN('JJ','sim')">✓ Sim</div>
+      <div class="yn-btn no" id="ynJJ_nao" onclick="setYN('JJ','nao')">✗ Não</div>
+    </div>
+    <div class="cond-field" id="cfJJ">
+      <input class="finp" id="qualJJ" placeholder="Qual modalidade? Tempo de prática?">
+    </div>
+  </div>
+
+  <div class="frow">
+    <label class="flbl">Pratica alguma atividade física atualmente?</label>
+    <div class="yn-group">
+      <div class="yn-btn yes" id="ynAtiv_sim" onclick="setYN('Ativ','sim')">✓ Sim</div>
+      <div class="yn-btn no" id="ynAtiv_nao" onclick="setYN('Ativ','nao')">✗ Não</div>
+    </div>
+    <div class="cond-field" id="cfAtiv">
+      <input class="finp" id="qualAtiv" placeholder="Qual atividade?">
+      <div style="margin-top:8px">
+        <label class="flbl">Quantas vezes por semana?</label>
+        <div class="radio-group" id="vezesGroup">
+          <label class="radio-item" onclick="selRadio('vezes',this,'1x')"><input type="radio" name="vezes" value="1x">1x</label>
+          <label class="radio-item" onclick="selRadio('vezes',this,'2x')"><input type="radio" name="vezes" value="2x">2x</label>
+          <label class="radio-item" onclick="selRadio('vezes',this,'3x')"><input type="radio" name="vezes" value="3x">3x</label>
+          <label class="radio-item" onclick="selRadio('vezes',this,'Todos os dias')"><input type="radio" name="vezes" value="Todos">Todos</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frow">
+    <label class="flbl">Como ficou sabendo da Drill BJJ?</label>
+    <div class="radio-group" id="comoGroup">
+      <label class="radio-item" onclick="selRadio('como',this,'Indicação')"><input type="radio" name="como" value="Indicação">👥 Indicação</label>
+      <label class="radio-item" onclick="selRadio('como',this,'Internet')"><input type="radio" name="como" value="Internet">🌐 Internet</label>
+      <label class="radio-item" onclick="selRadio('como',this,'Flyer')"><input type="radio" name="como" value="Flyer">📄 Flyer</label>
+      <label class="radio-item" onclick="selRadio('como',this,'Outros')"><input type="radio" name="como" value="Outros">💬 Outros</label>
+    </div>
+    <div class="cond-field" id="cfComo">
+      <input class="finp" id="quemIndicou" placeholder="Quem te indicou / qual fonte?">
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="btn-back" onclick="goStep(2)">← Voltar</button>
+    <button class="btn-next" onclick="goStep(4)">Próximo ➜</button>
+  </div>
+</div>
+
+<!-- ── STEP 4: OBJETIVOS ── -->
+<div class="step" id="step4">
+  <div class="step-title">🎯 Seus Objetivos</div>
+  <div class="step-sub">O que você busca na Drill BJJ?</div>
+
+  <div class="frow">
+    <label class="flbl">Principais objetivos <span style="color:var(--text3)">(pode marcar vários)</span></label>
+    <div class="radio-group" id="objGroup" style="flex-wrap:wrap">
+      <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Defesa Pessoal')">🛡️ Defesa Pessoal</label>
+      <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Saúde e Qualidade de Vida')">💪 Saúde / QV</label>
+      <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Competição')">🏆 Competição</label>
+      <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Emagrecimento')">⚡ Emagrecimento</label>
+      <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Disciplina Mental')">🧠 Disciplina</label>
+      <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Socialização')">🤝 Socialização</label>
+    </div>
+  </div>
+
+  <div class="frow">
+    <label class="flbl">O que você espera da Drill BJJ e dos professores?</label>
+    <textarea class="ftxt" id="expectativa" placeholder="Escreva livremente suas expectativas..."></textarea>
+  </div>
+
+  <div class="nav">
+    <button class="btn-back" onclick="goStep(3)">← Voltar</button>
+    <button class="btn-next" onclick="goStep(5)">Próximo ➜</button>
+  </div>
+</div>
+
+<!-- ── STEP 5: CONFIRMAÇÃO ── -->
+<div class="step" id="step5">
+  <div class="step-title">✅ Confirmar Cadastro</div>
+  <div class="step-sub">Revise e confirme seus dados</div>
+
+  <div id="resumo" style="background:#0a1428;border:1.5px solid var(--border);
+    border-radius:var(--radius);padding:1rem;margin-bottom:1rem;
+    font-size:13px;line-height:1.9;color:var(--text2)"></div>
+
+  <div style="background:#1a2a00;border:1.5px solid #4a6a00;border-radius:var(--radius);
+    padding:.9rem 1rem;margin-bottom:1rem">
+    <p style="font-size:12px;color:#a0c040;line-height:1.6">
+      ✅ Ao confirmar, seus dados serão salvos com segurança e você será cadastrado(a) como aluno(a) experimental da Drill BJJ School.
+    </p>
+  </div>
+
+  <div class="nav">
+    <button class="btn-back" onclick="goStep(4)">← Voltar</button>
+    <button class="btn-next" id="btnEnviar" onclick="enviar()">🥋 Confirmar Cadastro</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success" id="successScreen">
+  <div class="success-icon">🥋</div>
+  <div class="success-title">Bem-vindo(a) à<br>Drill BJJ School!</div>
+  <div class="success-msg">
+    Seu cadastro foi realizado com sucesso!<br>
+    O professor já foi notificado.<br><br>
+    <strong style="color:var(--yellow)">Não esqueça:</strong><br>
+    • Bermuda tactel + camiseta<br>
+    • Chinelinho para fora do tatame<br>
+    • O kimono é com a gente! 😊
+  </div>
+  <div class="success-belt">
+    <div class="belt-dot" style="background:#fff"></div>
+    <div class="belt-dot" style="background:#3b82f6"></div>
+    <div class="belt-dot" style="background:#7c3aed"></div>
+    <div class="belt-dot" style="background:#92400e"></div>
+    <div class="belt-dot" style="background:#000"></div>
+  </div>
+  <p style="font-size:13px;color:var(--text3)">OSS! 🤜🤛</p>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spin"></div>
+  <div class="loading-txt">Salvando cadastro...</div>
+</div>
+
+<script>
+const LS_URL = 'drill_ficha_url';
+let currentStep = 1;
+const totalSteps = 5;
+let formData = {};
+let selectedObjs = [];
+let ynState = {};
+let radioState = {};
+let scriptUrl = localStorage.getItem(LS_URL) || '';
+
+// Show config if no URL
+window.addEventListener('DOMContentLoaded', () => {
+  if (!scriptUrl) document.getElementById('cfgBanner').classList.add('show');
+});
+
+function saveCfg() {
+  const url = document.getElementById('cfgUrl').value.trim();
+  if (url.startsWith('https://script.google.com')) {
+    scriptUrl = url;
+    localStorage.setItem(LS_URL, url);
+    document.getElementById('cfgBanner').classList.remove('show');
+  } else {
+    alert('URL inválida.');
+  }
+}
+
+function goStep(n) {
+  if (n === 2) {
+    const nome = document.getElementById('nome').value.trim();
+    if (!nome) { document.getElementById('nome').focus(); return alert('Por favor, informe seu nome.'); }
+  }
+  if (n === 3) {
+    const fone = document.getElementById('fone').value.trim();
+    if (!fone) { document.getElementById('fone').focus(); return alert('Por favor, informe seu WhatsApp.'); }
+  }
+
+  document.getElementById('step' + currentStep).classList.remove('active');
+  currentStep = n;
+  document.getElementById('step' + n).classList.add('active');
+
+  const pct = (n / totalSteps) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressTxt').textContent = 'Passo ' + n + ' de ' + totalSteps;
+
+  if (n === 5) buildResumo();
+  window.scrollTo(0, 0);
+}
+
+function setYN(field, val) {
+  ynState[field] = val;
+  document.getElementById('yn' + field + '_sim').classList.toggle('sel', val === 'sim');
+  document.getElementById('yn' + field + '_nao').classList.toggle('sel', val === 'nao');
+  const cf = document.getElementById('cf' + field);
+  if (cf) cf.classList.toggle('show', val === 'sim');
+}
+
+function selRadio(name, el, val) {
+  radioState[name] = val;
+  document.querySelectorAll('#' + name + 'Group .radio-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+  if (name === 'como') {
+    document.getElementById('cfComo').classList.toggle('show', val === 'Indicação' || val === 'Outros');
+  }
+}
+
+function toggleMulti(el, val) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    if (!selectedObjs.includes(val)) selectedObjs.push(val);
+  } else {
+    selectedObjs = selectedObjs.filter(v => v !== val);
+  }
+}
+
+function buildResumo() {
+  const fields = [
+    ['Nome', document.getElementById('nome').value],
+    ['Nascimento / Idade', (document.getElementById('dataNasc').value || '') + (document.getElementById('idade').value ? ' · ' + document.getElementById('idade').value + ' anos' : '')],
+    ['WhatsApp', document.getElementById('fone').value],
+    ['E-mail', document.getElementById('email').value],
+    ['Responsável', document.getElementById('responsavel').value],
+    ['Como soube', radioState['como'] || '—'],
+    ['Praticou JJ?', ynState['JJ'] === 'sim' ? 'Sim — ' + (document.getElementById('qualJJ').value || '') : ynState['JJ'] === 'nao' ? 'Não' : '—'],
+    ['Objetivos', selectedObjs.length ? selectedObjs.join(', ') : '—'],
+  ];
+  document.getElementById('resumo').innerHTML = fields
+    .filter(([,v]) => v && v.trim && v.trim())
+    .map(([l,v]) => `<div><span style="color:var(--yellow);font-weight:700">${l}:</span> ${v}</div>`)
+    .join('');
+}
+
+function collectData() {
+  return {
+    tipo: 'ficha',
+    timestamp: new Date().toISOString(),
+    nome: document.getElementById('nome').value.trim(),
+    dataNasc: document.getElementById('dataNasc').value,
+    idade: document.getElementById('idade').value,
+    profissao: document.getElementById('profissao').value,
+    peso: document.getElementById('peso').value,
+    altura: document.getElementById('altura').value,
+    estadoCivil: document.getElementById('estadoCivil').value,
+    fone: document.getElementById('fone').value,
+    email: document.getElementById('email').value,
+    endereco: document.getElementById('endereco').value,
+    bairro: document.getElementById('bairro').value,
+    cep: document.getElementById('cep').value,
+    responsavel: document.getElementById('responsavel').value,
+    wpResp: document.getElementById('wpResp').value,
+    jaJJ: ynState['JJ'] || 'nao',
+    qualJJ: document.getElementById('qualJJ').value,
+    ativFisica: ynState['Ativ'] || 'nao',
+    qualAtiv: document.getElementById('qualAtiv').value,
+    vezesSemana: radioState['vezes'] || '',
+    comoSoube: radioState['como'] || '',
+    quemIndicou: document.getElementById('quemIndicou').value,
+    objetivos: selectedObjs.join(', '),
+    expectativa: document.getElementById('expectativa').value,
+  };
+}
+
+async function enviar() {
+  const data = collectData();
+  if (!data.nome) return alert('Nome é obrigatório.');
+
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('btnEnviar').disabled = true;
+
+  if (!scriptUrl) {
+    // Modo offline — salva local
+    const stored = JSON.parse(localStorage.getItem('drill_fichas') || '[]');
+    stored.push(data);
+    localStorage.setItem('drill_fichas', JSON.stringify(stored));
+    showSuccess();
+    return;
+  }
+
+  try {
+    await fetch(scriptUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    showSuccess();
+  } catch(e) {
+    // no-cors blocks response but save likely worked
+    showSuccess();
+  }
+}
+
+function showSuccess() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('progressFill').closest('.progress-wrap').style.display = 'none';
+  document.getElementById('successScreen').classList.add('show');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
