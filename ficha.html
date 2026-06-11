@@ -200,7 +200,7 @@
     <input class="finp" id="fone" type="tel" placeholder="(51) 99999-0000" autocomplete="tel">
   </div>
   <div class="frow">
-    <label class="flbl">E-mail</label>
+    <label class="flbl">E-mail <span style="color:var(--yellow)">*</span></label>
     <input class="finp" id="email" type="email" placeholder="seu@email.com" autocomplete="email">
   </div>
   <div class="frow">
@@ -403,7 +403,21 @@ function goStep(n) {
   }
   if (n === 3) {
     const fone = document.getElementById('fone').value.trim();
-    if (!fone) { document.getElementById('fone').focus(); return alert('Por favor, informe seu WhatsApp.'); }
+    if (!fone) { document.getElementById('fone').focus(); return alert('WhatsApp é obrigatório!'); }
+    const email = document.getElementById('email').value.trim();
+    if (!email) { document.getElementById('email').focus(); return alert('E-mail é obrigatório!'); }
+  }
+  if (n === 4) {
+    if (!document.getElementById('cfAtiv').classList.contains('show') &&
+        !document.getElementById('cfJJ').classList.contains('show') &&
+        Object.keys(ynState).length === 0) {
+      return alert('Por favor, responda as perguntas sobre experiência.');
+    }
+  }
+  if (n === 5) {
+    if (selectedObjs.length === 0) {
+      return alert('Selecione pelo menos um objetivo!');
+    }
   }
 
   document.getElementById('step' + currentStep).classList.remove('active');
