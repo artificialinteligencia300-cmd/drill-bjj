@@ -142,36 +142,55 @@
 
 <!-- ── STEP 1: DADOS PESSOAIS ── -->
 <div class="step active" id="step1">
-  <div class="step-title">👤 Dados Pessoais</div>
-  <div class="step-sub">Preencha seus dados básicos</div>
+  <div class="step-title">📅 Agenda da Aula Experimental</div>
+  <div class="step-sub">Dados do agendamento e identificação</div>
+
+  <div style="background:#1a2a00;border:1.5px solid var(--yellow);border-radius:var(--radius);padding:.85rem 1rem;margin-bottom:1rem">
+    <div style="font-size:11px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem">🗓️ Agendamento</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="frow" style="margin:0">
+        <label class="flbl">Data da aula <span>*</span></label>
+        <input class="finp" id="aulaData" type="date">
+      </div>
+      <div class="frow" style="margin:0">
+        <label class="flbl">Horário <span>*</span></label>
+        <input class="finp" id="aulaHorario" type="time">
+      </div>
+    </div>
+  </div>
 
   <div class="frow">
     <label class="flbl">Nome completo <span>*</span></label>
-    <input class="finp" id="nome" placeholder="Seu nome completo" autocomplete="name">
+    <input class="finp" id="nome" placeholder="Nome e sobrenome (mínimo)" autocomplete="name">
+  </div>
+  <div class="frow">
+    <label class="flbl">CPF <span>*</span></label>
+    <input class="finp" id="cpf" placeholder="000.000.000-00" maxlength="14"
+      oninput="this.value=this.value.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')">
   </div>
   <div class="fgrid">
     <div class="frow">
-      <label class="flbl">Data de Nascimento</label>
+      <label class="flbl">Data de Nascimento <span>*</span></label>
       <input class="finp" id="dataNasc" type="date">
     </div>
     <div class="frow">
-      <label class="flbl">Idade</label>
-      <input class="finp" id="idade" type="number" placeholder="Ex: 13" min="3" max="80">
+      <label class="flbl">Idade <span>*</span></label>
+      <input class="finp" id="idade" type="number" placeholder="Ex: 13" min="3" max="80" oninput="checkMenorIdade()">
+    </div>
+  </div>
+  <div class="fgrid">
+    <div class="frow">
+      <label class="flbl">Peso (kg) <span>*</span></label>
+      <input class="finp" id="peso" type="number" placeholder="Ex: 65">
+    </div>
+    <div class="frow">
+      <label class="flbl">Altura (cm) <span>*</span></label>
+      <input class="finp" id="altura" type="number" placeholder="Ex: 170">
     </div>
   </div>
   <div class="frow">
     <label class="flbl">Profissão</label>
     <input class="finp" id="profissao" placeholder="Ex: Estudante, Engenheiro...">
-  </div>
-  <div class="fgrid">
-    <div class="frow">
-      <label class="flbl">Peso (kg)</label>
-      <input class="finp" id="peso" type="number" placeholder="Ex: 65">
-    </div>
-    <div class="frow">
-      <label class="flbl">Altura (cm)</label>
-      <input class="finp" id="altura" type="number" placeholder="Ex: 170">
-    </div>
   </div>
   <div class="frow">
     <label class="flbl">Estado Civil</label>
@@ -183,6 +202,13 @@
       <option>Viúvo(a)</option>
       <option>União Estável</option>
     </select>
+  </div>
+
+  <!-- ALERTA MENOR DE IDADE -->
+  <div id="menorAlert" style="display:none;background:#0d1f3c;border:1.5px solid #5b8dee;
+    border-radius:var(--radius);padding:.7rem 1rem;margin-bottom:.5rem">
+    <div style="font-size:12px;color:#93b4f5;font-weight:700">⚠️ Aluno menor de idade</div>
+    <div style="font-size:11px;color:#6a7fa8;margin-top:2px">O preenchimento dos dados do responsável legal é obrigatório no próximo passo.</div>
   </div>
 
   <div class="nav">
@@ -218,14 +244,20 @@
     </div>
   </div>
 
-  <!-- RESPONSÁVEL SE MENOR -->
+  <!-- RESPONSÁVEL — obrigatório se menor -->
   <div id="respSection">
-    <div class="frow">
-      <label class="flbl">Nome do Responsável <span style="color:var(--text3)">(se menor de idade)</span></label>
-      <input class="finp" id="responsavel" placeholder="Nome do responsável legal">
+    <div style="background:#0d1f3c;border:1px solid #243a73;border-radius:var(--radius-sm);
+      padding:.6rem .9rem;margin-bottom:.7rem">
+      <div id="respLabel" style="font-size:11px;color:#6a7fa8">
+        Preencha caso o aluno seja menor de 18 anos
+      </div>
     </div>
     <div class="frow">
-      <label class="flbl">WhatsApp do Responsável</label>
+      <label class="flbl" id="lbl-resp">Nome do Responsável</label>
+      <input class="finp" id="responsavel" placeholder="Nome completo do responsável legal">
+    </div>
+    <div class="frow">
+      <label class="flbl" id="lbl-wpResp">WhatsApp do Responsável</label>
       <input class="finp" id="wpResp" type="tel" placeholder="(51) 99999-0000">
     </div>
   </div>
@@ -273,6 +305,22 @@
   </div>
 
   <div class="frow">
+    <label class="flbl">Histórico de saúde — Problemas cardíacos ou respiratórios? <span>*</span></label>
+    <div class="yn-group">
+      <div class="yn-btn no" id="ynSaude_nao" onclick="setYN('Saude','nao')">✓ Não tenho</div>
+      <div class="yn-btn yes" id="ynSaude_sim" onclick="setYN('Saude','sim')">⚠ Sim, tenho</div>
+    </div>
+    <div class="cond-field" id="cfSaude">
+      <input class="finp" id="qualSaude" placeholder="Descreva o problema (ex: arritmia, asma...)">
+    </div>
+  </div>
+
+  <div class="frow">
+    <label class="flbl">Informações importantes para o professor</label>
+    <textarea class="ftxt" id="infoProf" placeholder="Lesões anteriores, cirurgias, limitações físicas ou qualquer informação relevante que o professor deve saber..."></textarea>
+  </div>
+
+  <div class="frow">
     <label class="flbl">Como ficou sabendo da Drill BJJ?</label>
     <div class="radio-group" id="comoGroup">
       <label class="radio-item" onclick="selRadio('como',this,'Indicação')"><input type="radio" name="como" value="Indicação">👥 Indicação</label>
@@ -293,13 +341,14 @@
 
 <!-- ── STEP 4: OBJETIVOS ── -->
 <div class="step" id="step4">
-  <div class="step-title">🎯 Seus Objetivos</div>
-  <div class="step-sub">O que você busca na Drill BJJ?</div>
+  <div class="step-title">🎯 Objetivos</div>
+  <div class="step-sub">Selecione pelo menos 3 objetivos</div>
 
   <div class="frow">
     <label class="flbl">Principais objetivos <span style="color:var(--text3)">(pode marcar vários)</span></label>
     <div class="radio-group" id="objGroup" style="flex-wrap:wrap">
       <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Defesa Pessoal')">🛡️ Defesa Pessoal</label>
+      <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Condicionamento Físico')">🏃 Condicionamento</label>
       <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Saúde e Qualidade de Vida')">💪 Saúde / QV</label>
       <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Competição')">🏆 Competição</label>
       <label class="radio-item" style="min-width:140px" onclick="toggleMulti(this,'Emagrecimento')">⚡ Emagrecimento</label>
@@ -309,8 +358,9 @@
   </div>
 
   <div class="frow">
-    <label class="flbl">O que você espera da Drill BJJ e dos professores?</label>
-    <textarea class="ftxt" id="expectativa" placeholder="Escreva livremente suas expectativas..."></textarea>
+    <label class="flbl">O que você espera da Drill BJJ e dos professores? <span>*</span></label>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:5px">Conte sobre suas expectativas com a escola e os professores</div>
+    <textarea class="ftxt" id="expectativa" placeholder="Ex: Espero aprender defesa pessoal, melhorar minha disciplina e fazer novos amigos. Dos professores espero paciência e atenção ao meu desenvolvimento..."></textarea>
   </div>
 
   <div class="nav">
@@ -348,10 +398,17 @@
   <div class="success-msg">
     Seu cadastro foi realizado com sucesso!<br>
     O professor já foi notificado.<br><br>
-    <strong style="color:var(--yellow)">Não esqueça:</strong><br>
-    • Bermuda tactel + camiseta<br>
-    • Chinelinho para fora do tatame<br>
-    • O kimono é com a gente! 😊
+    <strong style="color:var(--yellow)">📋 Itens obrigatórios para o treino:</strong><br>
+    • Bermuda ou short esportivo + camiseta (lycra/rash guard é ideal)<br>
+    • Chinelinho para circular fora do tatame<br>
+    • O kimono é por nossa conta! 🥋<br><br>
+    <strong style="color:var(--yellow)">⚠️ Retirar antes de entrar no tatame:</strong><br>
+    • Brincos, piercings e alargadores<br>
+    • Pulseiras, anéis e correntes<br>
+    • Relógio e acessórios de metal<br>
+    • Óculos (prefira lentes de contato)<br>
+    • Itens de cabelo com metal (grampos, presilhas metálicas)<br><br>
+    <strong style="color:var(--yellow)">🔒 Por sua segurança e a do colega!</strong>
   </div>
   <div class="success-belt">
     <div class="belt-dot" style="background:#fff"></div>
@@ -398,26 +455,54 @@ function saveCfg() {
 
 function goStep(n) {
   if (n === 2) {
+    // Validar agenda
+    if (!document.getElementById('aulaData').value)
+      return alert('⚠️ Informe a data da aula experimental.');
+    if (!document.getElementById('aulaHorario').value)
+      return alert('⚠️ Informe o horário da aula experimental.');
+    // Validar nome (mínimo nome + sobrenome)
     const nome = document.getElementById('nome').value.trim();
-    if (!nome) { document.getElementById('nome').focus(); return alert('Por favor, informe seu nome.'); }
+    if (!nome || nome.split(' ').filter(w=>w.length>0).length < 2)
+      return alert('⚠️ Informe nome completo (nome e sobrenome).');
+    const cpf = document.getElementById('cpf').value.replace(/\D/g,'');
+    if (cpf.length !== 11) return alert('⚠️ CPF inválido. Informe os 11 dígitos.');
+    // Campos obrigatórios pessoais
+    if (!document.getElementById('dataNasc').value)
+      return alert('⚠️ Data de nascimento é obrigatória.');
+    if (!document.getElementById('idade').value)
+      return alert('⚠️ Idade é obrigatória.');
+    if (!document.getElementById('peso').value)
+      return alert('⚠️ Peso é obrigatório.');
+    if (!document.getElementById('altura').value)
+      return alert('⚠️ Altura é obrigatória.');
   }
   if (n === 3) {
     const fone = document.getElementById('fone').value.trim();
-    if (!fone) { document.getElementById('fone').focus(); return alert('WhatsApp é obrigatório!'); }
+    if (!fone) return alert('⚠️ WhatsApp é obrigatório.');
     const email = document.getElementById('email').value.trim();
-    if (!email) { document.getElementById('email').focus(); return alert('E-mail é obrigatório!'); }
+    if (!email) return alert('⚠️ E-mail é obrigatório.');
+    // Se menor, responsável obrigatório
+    const idade = parseInt(document.getElementById('idade').value)||0;
+    if (idade > 0 && idade < 18) {
+      if (!document.getElementById('responsavel').value.trim())
+        return alert('⚠️ Nome do responsável é obrigatório para menores de 18 anos.');
+      if (!document.getElementById('wpResp').value.trim())
+        return alert('⚠️ WhatsApp do responsável é obrigatório para menores de 18 anos.');
+    }
   }
   if (n === 4) {
-    if (!document.getElementById('cfAtiv').classList.contains('show') &&
-        !document.getElementById('cfJJ').classList.contains('show') &&
-        Object.keys(ynState).length === 0) {
-      return alert('Por favor, responda as perguntas sobre experiência.');
-    }
+    if (!ynState['Saude'])
+      return alert('⚠️ Responda a pergunta sobre histórico de saúde.');
+    if (!ynState['JJ'])
+      return alert('⚠️ Responda se já praticou Jiu-Jitsu.');
+    if (!ynState['Ativ'])
+      return alert('⚠️ Responda se pratica atividade física.');
   }
   if (n === 5) {
-    if (selectedObjs.length === 0) {
-      return alert('Selecione pelo menos um objetivo!');
-    }
+    if (selectedObjs.length < 3)
+      return alert('⚠️ Selecione pelo menos 3 objetivos.');
+    if (!document.getElementById('expectativa').value.trim())
+      return alert('⚠️ Conte o que espera da Drill BJJ e dos professores.');
   }
 
   document.getElementById('step' + currentStep).classList.remove('active');
@@ -460,14 +545,18 @@ function toggleMulti(el, val) {
 
 function buildResumo() {
   const fields = [
+    ['Data da aula', (document.getElementById('aulaData').value||'') + ' às ' + (document.getElementById('aulaHorario').value||'')],
     ['Nome', document.getElementById('nome').value],
+    ['CPF', document.getElementById('cpf').value],
     ['Nascimento / Idade', (document.getElementById('dataNasc').value || '') + (document.getElementById('idade').value ? ' · ' + document.getElementById('idade').value + ' anos' : '')],
+    ['Peso / Altura', (document.getElementById('peso').value||'')+'kg / '+(document.getElementById('altura').value||'')+'cm'],
     ['WhatsApp', document.getElementById('fone').value],
     ['E-mail', document.getElementById('email').value],
     ['Responsável', document.getElementById('responsavel').value],
+    ['Saúde', ynState['Saude']==='sim'?'⚠️ Problema: '+(document.getElementById('qualSaude').value||'ver ficha'):'✓ Sem problemas cardíacos/respiratórios'],
     ['Como soube', radioState['como'] || '—'],
-    ['Praticou JJ?', ynState['JJ'] === 'sim' ? 'Sim — ' + (document.getElementById('qualJJ').value || '') : ynState['JJ'] === 'nao' ? 'Não' : '—'],
-    ['Objetivos', selectedObjs.length ? selectedObjs.join(', ') : '—'],
+    ['Praticou JJ?', ynState['JJ'] === 'sim' ? 'Sim — ' + (document.getElementById('qualJJ').value || '') : 'Não'],
+    ['Objetivos ('+selectedObjs.length+')', selectedObjs.length ? selectedObjs.join(', ') : '—'],
   ];
   document.getElementById('resumo').innerHTML = fields
     .filter(([,v]) => v && v.trim && v.trim())
@@ -475,11 +564,33 @@ function buildResumo() {
     .join('');
 }
 
+function checkMenorIdade() {
+  const idade = parseInt(document.getElementById('idade').value)||0;
+  const alert = document.getElementById('menorAlert');
+  const lbl = document.getElementById('lbl-resp');
+  const lbl2 = document.getElementById('lbl-wpResp');
+  const respLabel = document.getElementById('respLabel');
+  if (idade > 0 && idade < 18) {
+    if (alert) alert.style.display = 'block';
+    if (lbl) lbl.innerHTML = 'Nome do Responsável <span style="color:var(--yellow)">*</span>';
+    if (lbl2) lbl2.innerHTML = 'WhatsApp do Responsável <span style="color:var(--yellow)">*</span>';
+    if (respLabel) respLabel.innerHTML = '<strong style="color:var(--yellow)">⚠️ Aluno menor de 18 anos — Responsável obrigatório</strong>';
+  } else {
+    if (alert) alert.style.display = 'none';
+    if (lbl) lbl.textContent = 'Nome do Responsável';
+    if (lbl2) lbl2.textContent = 'WhatsApp do Responsável';
+    if (respLabel) respLabel.innerHTML = 'Preencha caso o aluno seja menor de 18 anos';
+  }
+}
+
 function collectData() {
   return {
     tipo: 'ficha',
     timestamp: new Date().toISOString(),
+    aulaData: document.getElementById('aulaData').value,
+    aulaHorario: document.getElementById('aulaHorario').value,
     nome: document.getElementById('nome').value.trim(),
+    cpf: document.getElementById('cpf').value.trim(),
     dataNasc: document.getElementById('dataNasc').value,
     idade: document.getElementById('idade').value,
     profissao: document.getElementById('profissao').value,
@@ -493,6 +604,9 @@ function collectData() {
     cep: document.getElementById('cep').value,
     responsavel: document.getElementById('responsavel').value,
     wpResp: document.getElementById('wpResp').value,
+    saudeProblema: ynState['Saude'] || 'nao',
+    qualSaude: document.getElementById('qualSaude')?.value || '',
+    infoProf: document.getElementById('infoProf')?.value || '',
     jaJJ: ynState['JJ'] || 'nao',
     qualJJ: document.getElementById('qualJJ').value,
     ativFisica: ynState['Ativ'] || 'nao',
